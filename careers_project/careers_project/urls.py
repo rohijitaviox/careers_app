@@ -14,8 +14,38 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.urls import re_path 
+from candidate_app.api import CandidateViewset
+from rest_framework.routers import SimpleRouter
+from jobpost_app.api import JobsViewset, InterviewViewset
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+
+router = SimpleRouter()
+
+router.register(r'candidate',CandidateViewset)
+router.register(r'jobs', JobsViewset)
+router.register(r'jobinterview', InterviewViewset)
+
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Snippets API",
+      default_version='v1',
+   ),
+   public=True,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include([
+        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        path('accounts/',include('accounts.urls')),
+        path('candidate/',include('candidate_app.urls',namespace='candidate')),
+        path('jobs/',include('jobpost_app.urls')),
+    ]))
+    
 ]
+urlpatterns+=router.urls

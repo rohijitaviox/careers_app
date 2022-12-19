@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework.test import APIClient
 
 
 class TestUserViews(APITestCase):
@@ -22,12 +23,14 @@ class TestUserViews(APITestCase):
         self.login_url = reverse("accounts:login")
 
     def test_user_creation(self):
+        client = APIClient()
+
         res = self.client.post(
             self.user_url, self.create_user_data, format='json')
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         user = User.objects.filter(username=self.create_user_data['username'])
         self.assertEqual(user.count(), 1)
-        # FOr failed request in case of signing up again
+        # For failed request in case of signing up again
         res_failed = self.client.post(
             self.user_url, self.create_user_data, format='json')
         self.assertEqual(res_failed.status_code, status.HTTP_400_BAD_REQUEST)
